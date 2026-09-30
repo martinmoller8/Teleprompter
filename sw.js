@@ -1,5 +1,5 @@
 // Offline-cache: appen virker også uden netforbindelse, når den har været åbnet én gang.
-const CACHE = 'teleprompter-v2';
+const CACHE = 'teleprompter-v3';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {

@@ -1003,6 +1003,49 @@
     try { localStorage.setItem('iosBannerDismissed', '1'); } catch (e) {}
   }
 
+  // ── GEM MANUSKRIPT OG INDSTILLINGER ───────────────────
+  // Gemmes lokalt på telefonen, så teksten er der igen næste gang appen åbnes
+  const STORE_KEY = 'teleprompter-state';
+  const scriptInput = document.getElementById('script-input');
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({
+        text: scriptInput.value, speed, fontSize, textWidth, mirrored,
+      }));
+    } catch (e) {}
+  }
+
+  function loadState() {
+    let st = null;
+    try { st = JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) {}
+    if (!st) return;
+    if (typeof st.text === 'string') scriptInput.value = st.text;
+    if (typeof st.speed === 'number') setSpeed(st.speed);
+    if (typeof st.fontSize === 'number') {
+      fontSize = Math.min(96, Math.max(16, st.fontSize));
+      sizeSlider.value = fontSize; sizeVal.textContent = fontSize; barSizeVal.textContent = fontSize;
+    }
+    if (typeof st.textWidth === 'number') {
+      textWidth = Math.min(100, Math.max(20, st.textWidth));
+      widthSlider.value = textWidth; widthVal.textContent = textWidth + '%'; barWidthVal.textContent = textWidth + '%';
+    }
+    if (st.mirrored === true && !mirrored) toggleMirror();
+  }
+
+  loadState();
+
+  let saveTimer = null;
+  scriptInput.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveState, 400);
+  });
+  [speedSlider, sizeSlider, widthSlider].forEach((el) => el.addEventListener('change', saveState));
+  mirrorBtn.addEventListener('click', saveState);
+  document.querySelectorAll('[data-hold]').forEach((b) => b.addEventListener('pointerup', saveState));
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveState(); });
+  window.addEventListener('pagehide', saveState);
+
   // ── OFFLINE (PWA) ─────────────────────────────────────
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
